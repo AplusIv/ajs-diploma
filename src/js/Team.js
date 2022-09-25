@@ -1,3 +1,6 @@
+import characterGenerator from './generators';
+
+
 /**
  * Класс, представляющий персонажей команды
  *
@@ -13,4 +16,7 @@
  * */
 export default class Team {
   // TODO: write your logic here
+  constructor(characters) {
+    this.characters = [...characters];
+  }
 }

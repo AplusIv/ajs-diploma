@@ -14,11 +14,14 @@
  */
 export default class Character {
   constructor(level, type = 'generic') {
+    // TODO: выбросите исключение, если кто-то использует "new Character()"
+    console.log(new.target.name);
+    if (new.target.name === 'Character') throw new Error('cant instantiate an object from class Character');
+    
     this.level = level;
     this.attack = 0;
     this.defence = 0;
     this.health = 50;
     this.type = type;
-    // TODO: выбросите исключение, если кто-то использует "new Character()"
   }
 }

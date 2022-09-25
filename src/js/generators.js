@@ -1,3 +1,12 @@
+// questionable
+import Bowman from './characters/Bowman';
+import Swordsman from './characters/Swordsman';
+import Magician from './characters/Magician';
+// Под вопросом
+
+
+import Team from './Team';
+
 /**
  * Формирует экземпляр персонажа из массива allowedTypes со
  * случайным уровнем от 1 до maxLevel
@@ -10,6 +19,11 @@
  */
 export function* characterGenerator(allowedTypes, maxLevel) {
   // TODO: write logic here
+  const randomIndex = Math.floor(0 + Math.random() * ((allowedTypes.length - 1) + 1 - 0));
+  const randomLevel = Math.floor(1 + Math.random() * (maxLevel + 1 - 1));
+  yield new allowedTypes[randomIndex](randomLevel);
+
+  yield* characterGenerator(allowedTypes, maxLevel); // композиция. Чтобы возращался новый персонаж бесконечное количество раз
 }
 
 /**
@@ -21,4 +35,10 @@ export function* characterGenerator(allowedTypes, maxLevel) {
  * */
 export function generateTeam(allowedTypes, maxLevel, characterCount) {
   // TODO: write logic here
+  const characters = [];
+  for (let i = 0; i < characterCount; i += 1) {
+    const character = characterGenerator(allowedTypes, maxLevel).next().value;
+    characters.push(character);
+  }
+  return new Team(characters);
 }

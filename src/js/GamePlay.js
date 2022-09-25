@@ -1,4 +1,6 @@
 import { calcHealthLevel, calcTileType } from './utils';
+// 
+import GameController from './GameController';
 
 export default class GamePlay {
   constructor() {
@@ -149,12 +151,16 @@ export default class GamePlay {
     event.preventDefault();
     const index = this.cells.indexOf(event.currentTarget);
     this.cellEnterListeners.forEach(o => o.call(null, index));
+    //
+    //console.log(index);
   }
 
   onCellLeave(event) {
     event.preventDefault();
     const index = this.cells.indexOf(event.currentTarget);
     this.cellLeaveListeners.forEach(o => o.call(null, index));
+    //
+    //console.log(index);
   }
 
   onCellClick(event) {
