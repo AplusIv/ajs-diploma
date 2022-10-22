@@ -56,6 +56,7 @@ export default class GamePlay {
     for (let i = 0; i < this.boardSize ** 2; i += 1) {
       const cellEl = document.createElement('div');
       cellEl.classList.add('cell', 'map-tile', `map-tile-${calcTileType(i, this.boardSize)}`);
+      cellEl.dataset.index = i; // Добавил класс с номером индекса
       cellEl.addEventListener('mouseenter', event => this.onCellEnter(event));
       cellEl.addEventListener('mouseleave', event => this.onCellLeave(event));
       cellEl.addEventListener('click', event => this.onCellClick(event));
@@ -166,6 +167,8 @@ export default class GamePlay {
   onCellClick(event) {
     const index = this.cells.indexOf(event.currentTarget);
     this.cellClickListeners.forEach(o => o.call(null, index));
+    //
+    // this.cellClickListeners.forEach(o => o.call(this, index));
   }
 
   onNewGameClick(event) {
@@ -217,11 +220,20 @@ export default class GamePlay {
       damageEl.textContent = damage;
       damageEl.classList.add('damage');
       cell.appendChild(damageEl);
+      // 
+      console.log('Promise');
+      setTimeout(() => console.log("done"), 1000);
 
       damageEl.addEventListener('animationend', () => {
         cell.removeChild(damageEl);
-        resolve();
+        console.log('AnimationEnd');
+        resolve('AnimationEnd');
       });
+
+      /* damageEl.addEventListener('animationend', () => {
+        cell.removeChild(damageEl);
+        resolve();
+      }); */
     });
   }
 

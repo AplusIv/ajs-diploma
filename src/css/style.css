@@ -77,6 +77,65 @@ body {
   border-style: dashed;
 }
 
+/* Отображение ячеек */
+.cell::after {
+  content:attr(data-index);
+  z-index: 10000;
+  position: absolute;
+  left: 5px;
+  bottom: 15px;
+  color:blue;
+}
+/*  */
+
+.attackZone {
+  position: relative;
+  /* z-index: 1000; */
+  box-sizing: border-box;
+  /* width: 100%;
+  height: auto; */
+  width: var(--cell-size);
+  height: var(--cell-size);
+  opacity: 0.4;
+  background-color: #f00;
+}
+
+.attackZone::after {
+  content: '\01F680';
+  /* z-index: 10000; */
+  position: absolute;
+  /* left: 15px; */
+  /* bottom: 35px; */
+}
+
+.goZone {
+  position: relative;
+  /* z-index: 10000; */
+  box-sizing: border-box;
+  /* width: 100%;
+  height: auto; */
+  width: var(--cell-size);
+  height: var(--cell-size);
+  opacity: 0.7;
+  background-color: green;
+}
+
+.goZone::before {
+  content: '\01F3C3';
+  /* z-index: 10000; */
+  position: absolute;
+  /* left: 50px; */
+  /* bottom: 35px; */
+}
+
+.attackZone::after.goZone::before {
+  content: '\01F680 \01F3C3';
+  /* z-index: 10000; */
+  position: absolute;
+  /* left: 59px; */
+  /* bottom: 35px; */
+}
+
 .board.prairie {
   --map-tile-top-left-url: url('../img/prairie/map-tile-top-left.png');
   --map-tile-top-url: url('../img/prairie/map-tile-top.png');
