@@ -18,16 +18,23 @@ import cursors from "./cursors";
 
 // import { defineBorder, canGoPositions } from "./stepMechanics";
 import canGoPositions from "./stepMechanics";
+// import { setInterval } from "core-js";
+
+// For Enemy
+import { getCharacters, getDefineCharacter } from "./EnemyMechanics";
 
 // import './themes';
 
 // import GamePlay from "./GamePlay";
+
+
 
 export default class GameController {
   constructor(gamePlay, stateService) {
     this.gamePlay = gamePlay;
     this.stateService = stateService;
     //
+    this.gameState = ''; // Для реализации движения и атаки компьютера
     this.positionedTeams = [];
   }
 
@@ -62,31 +69,156 @@ export default class GameController {
 
     this.gamePlay.redrawPositions(this.positionedTeams);
 
+    // Определить ход команд
+    const gameState = new GameState();
+    console.log(gameState.nextMove); // player
+    this.gameState = gameState;
+
+    // Сэт интервал с проверкой чей ход
+    
+    const timer = setInterval(() => {
+      if (this.gameState.side === 'enemy') {
+        console.log(this.gameState.side);
+        // console.log(`Передаём ход ${this.gameState.side}`);
+        const enemies = getCharacters(this.positionedTeams, this.gameState.enemyCharacterClasses);
+        const players = getCharacters(this.positionedTeams, this.gameState.playerCharacterClasses);
+
+        const strongestEnemy = getDefineCharacter(enemies, (a, b) => b.character.attack - a.character.attack);
+        console.log(strongestEnemy);
+
+        const weakestPlayer = getDefineCharacter(players, (a, b) => a.character.health - b.character.health);
+        console.log(weakestPlayer);
+
+
+        const strongerEnemyAttackPositions = this.canAttackPositions(strongestEnemy.position, enemies); 
+        // canAttackPositions(index, positionedCharacters)
+        console.log(strongerEnemyAttackPositions);
+
+        // 1) Проверка возможности атаковать (найти всех, атаковать самого слабого)
+        const playersUnderAttack = [];
+        players.forEach((player) => {
+          if (strongerEnemyAttackPositions.includes(player.position)) {
+            playersUnderAttack.push(player);
+          }
+        });
+
+        console.log(playersUnderAttack);
+
+        if (playersUnderAttack.length > 0) {
+          // если массив не пустой, проверим его длину, найдём самого слабого
+          if (playersUnderAttack.length === 1) {
+            const damage = Math.max(strongestEnemy.character.attack - playersUnderAttack[0].character.defence, strongestEnemy.character.attack * 0.1);
+            console.log(damage);
+
+            playersUnderAttack[0].character.health -= damage;
+
+            console.log(this.gamePlay.showDamage(playersUnderAttack[0].position, damage)); // Добавить анимацию
+
+            console.log(`Здоровье уменьшилось на ${damage} и равняется ${playersUnderAttack[0].character.health}`);
+          }
+          const weakestOfPlayersUnderAttack = getDefineCharacter(playersUnderAttack, (a, b) => a.character.health - b.character.health);
+          const damage = Math.max(strongestEnemy.character.attack - weakestOfPlayersUnderAttack.character.defence, strongestEnemy.character.attack * 0.1);
+          console.log(damage);
+
+          weakestOfPlayersUnderAttack.character.health -= damage;
+
+          console.log(this.gamePlay.showDamage(weakestOfPlayersUnderAttack.position, damage)); // Добавить анимацию
+
+          console.log(`Здоровье уменьшилось на ${damage} и равняется ${weakestOfPlayersUnderAttack.character.health}`);
+        } else {
+          // console.log(strongestEnemy.position -= 1);
+          // strongestEnemy.position -= 1;
+
+          const alowedPositionsToGo = [...canGoPositions(this.defineBorder.bind(this), strongestEnemy.position, enemies)];
+          // const playerToGo = getDefineCharacter(getCharacters(positionedTeams, classesArray), (a, b) => a.character.health - b.character.health);
+          
+          console.log(`Противник может переместиться на ${alowedPositionsToGo}`);
+
+          // Для каждой позиции проверить, при перемещении в новую точку, можно ли будет атаковать противника
+          // Если да - перемещаться туда
+
+          // const step = alowedPositionsToGo.find((position) => this.canAttackPositions(position, enemies).includes(weakestPlayer.position));
+          // Вернёт либо нужную позицию, на которую нужно перейти, либо undefined
+
+          // цикл for На несколько ходов.
+          // Протестировать атаку и передачу хода, если игрок вне зоны атаки.
+
+          const initialPosition = strongestEnemy.position;
+          const tracks = [];
+          tracks.push(initialPosition);
+
+          strongerEnemyAttackPositions
+
+          const playersUnderAttack = [];
+          players.forEach((player) => {
+            if (strongerEnemyAttackPositions.includes(player.position)) {
+              playersUnderAttack.push(player);
+            }
+          });
+
+          /* while (condition) {
+            
+          } */
+
+          /* const tracks2 = [];
+          tracks2.push(initialPosition);
+
+          for (let index = 0; index < alowedPositionsToGo.length; index += 1) {
+            const element = array[index];
+            const move = alowedPositionsToGo[index];
+            strongestEnemy.position = move;
+            if (this.canAttackPositions(move, enemies).find(element => element === weakestPlayer.position)) {
+              console.log(this.canAttackPositions(move, enemies).find(element => element === weakestPlayer.position));
+              tracks.push(move);
+              break;
+            } else {
+              [...canGoPositions(this.defineBorder.bind(this), strongestEnemy.position, enemies)]
+              tracks2.push([]);
+            }
+          } */
+
+          /* do {
+            for (let index = 0; index < alowedPositionsToGo.length; index += 1) {
+              const element = array[index];
+              const move = alowedPositionsToGo[index];
+              strongestEnemy.position = move;
+            }
+          } while (this.canAttackPositions(strongestEnemy.position, enemies).includes(player.position) === false); */
+
+          for (let index = 0; index < alowedPositionsToGo.length; index += 1) {
+            const move = alowedPositionsToGo[index];
+            strongestEnemy.position = move;
+            if (this.canAttackPositions(move, enemies).find(element => element === weakestPlayer.position)) {
+              console.log(this.canAttackPositions(move, enemies).find(element => element === weakestPlayer.position));
+              tracks.push(move);
+              break;
+            }
+          }
+          console.log(tracks);
+          strongestEnemy.position = tracks[tracks.length - 1];
+        }
+
+        this.gamePlay.redrawPositions(this.positionedTeams);
+        this.gameState.nextMove = 'player';
+        console.log(this.gameState);
+
+      }
+      console.log(`Сейчас ходит ${this.gameState.side}`);
+    }, 1000); // таймаут для проверки чей ход
+    // 
+
     function showCharacterInfo(index, characters) {
       for (const character of characters) {
         if (character.position === index) {
           return `U+1F396${character.character.level} U+2694${character.character.attack} U+1F6E1${character.character.defence} U+2764${character.character.health}`;
         }
       }
-      /* if (character instanceof Character) {
-        return `U+1F396${character.level} U+2694${character.attack} U+1F6E1${character.defence} U+2764${character.health}`;
-      } */
-    }
-
-    for (let index = 0; index < this.gamePlay.cells.length; index += 1) {
-      // this.gamePlay.addCellEnterListener(this.onCellEnter(index));
-      // this.gamePlay.addCellLeaveListener(this.onCellLeave(index));
-      // this.gamePlay.addCellClickListener(this.onCellClick(index));
     }
 
     this.gamePlay.addCellEnterListener(this.onCellEnter.bind(this));
     this.gamePlay.addCellLeaveListener(this.onCellLeave.bind(this));
 
     this.gamePlay.addCellClickListener(this.onCellClick.bind(this));
-
-
-    // this.gamePlay.addCellEnterListener(this.onCellEnter(2));
-    // this.gamePlay.addCellLeaveListener(this.onCellLeave(0));
   }
 
   chooseAllStartPositions() {
@@ -106,7 +238,7 @@ export default class GameController {
 
       index += 1;
     }
-    // startPositions.push(playerStartPositions, enemyStartPositions);
+
     startPositions.playerStartPositions = playerStartPositions;
     startPositions.enemyStartPositions = enemyStartPositions;
     return startPositions;
@@ -143,14 +275,14 @@ export default class GameController {
         return `\u{1F396}${character.character.level} \u2694${character.character.attack} \u{1F6E1}${character.character.defence} \u2764${character.character.health}`;
       }
     }
-    /* if (character instanceof Character) {
-      return `U+1F396${character.level} U+2694${character.attack} U+1F6E1${character.defence} U+2764${character.health}`;
-    } */
   }
 
   onCellClick(index) {
     // TODO: react to click
     console.log(this);
+
+    console.log(GameState.enemyCharacterClasses);
+
     console.log(`Клик по ячейке ${index}`);
     console.log(this.gamePlay.cells[index]);
 
@@ -195,6 +327,8 @@ export default class GameController {
 
             this.gamePlay.cells.forEach((i) => i.classList.remove('attackZone', 'goZone')); // Убираем визуальное оформление границ атаки (Можно добавить в redrawPositions)
             this.gamePlay.redrawPositions(this.positionedTeams);
+            this.gameState.nextMove = 'enemy';
+            console.log(this.gameState);
 
             /* setTimeout(() => {
               this.gamePlay.cells.forEach((i) => i.classList.remove('attackZone', 'goZone')); // Убираем визуальное оформление границ атаки (Можно добавить в redrawPositions)
@@ -202,17 +336,9 @@ export default class GameController {
             }, 1000); */
           }
         }
-
-        /* const canAtack = this.canAttackPositions(index, this.positionedTeams);
-        canAtack.forEach((i) => {
-          this.gamePlay.cells[i].classList.remove('attackZone');
-          }); */
       }
       for (const characterClass of GameState.getTeamCharactersClasses().player) {
         if (this.gamePlay.cells[index].firstElementChild.classList.contains(characterClass)) {
-          /* if (this.lastIndex !== index && this.lastIndex) {
-            this.gamePlay.setCursor(cursors.pointer);
-          } */
           this.gamePlay.selectCell(index);
           this.lastIndex = index;
           console.log(`Текущий индекс с персонажем = ${this.lastIndex}`);
@@ -221,10 +347,11 @@ export default class GameController {
     } // else GamePlay.showError('Персонаж не обнаружен');
 
     // Визуальное оформление границ атаки и хода
+
+    // !!! Добавить очистку границ при переходе на недоступную ячейку или содержащую вражеский персонаж
+
     if (this.isChosenCharacter() === index) {
       this.gamePlay.cells.forEach((i) => i.classList.remove('attackZone', 'goZone'));
-
-      // this.gamePlay.cells.forEach((i) => i.classList.remove('goZone'));
 
       const canAtack = this.canAttackPositions(index, this.positionedTeams);
       canAtack.forEach((i) => {
@@ -250,6 +377,9 @@ export default class GameController {
           this.gamePlay.cells.forEach((i) => i.classList.remove('attackZone', 'goZone')); // Убираем визуальное оформление границ атаки (Можно добавить в redrawPositions)
 
           this.gamePlay.redrawPositions(this.positionedTeams);
+          // 
+          this.gameState.nextMove = 'enemy';
+          console.log(this.gameState);
         }
       }
 
@@ -294,7 +424,9 @@ export default class GameController {
     }
 
 
-    // Вернуть
+    // !!! Вернуть.
+    // Необходимо модифицировать, подсвечивая красным только, если вражеский персонаж в ячейке
+
     /* if (this.isChosenCharacter()) {
       const canAtack = this.canAttackPositions(this.isChosenCharacter(), this.positionedTeams);
       if (canAtack.includes(index)) {
@@ -319,56 +451,7 @@ export default class GameController {
   onCellLeave(index) {
     if (this.gamePlay.cells[index].hasChildNodes()) {
       if (this.gamePlay.cells[index].classList.contains('selected-yellow')) {
-        // this.canGoPositions(index, this.positionedTeams);
-        // console.log(GameState.getTeamCharactersClasses().player);
-        // for (const characterClass of GameState.getTeamCharactersClasses().player) {
-          // console.log(this.checkRadius(index, characterClass));
-          // console.log(this.checkRadius(index, characterClass).includes(index));
 
-          /* const characterPosition = index;
-          if (this.gamePlay.cells[index].firstElementChild.classList.contains('magician')) {
-            // if (characterClass === 'magician' && characterClass === 'daemon') {
-              const allowedPositions = [];
-              const borderPositions = new Set();
-
-              let i = 0;
-              while (i < this.gamePlay.boardSize) {
-                borderPositions.add(i * this.gamePlay.boardSize); // left border
-                borderPositions.add(this.gamePlay.boardSize - 1 + this.gamePlay.boardSize * i); // right border
-                borderPositions.add(i); // top border
-                borderPositions.add((this.gamePlay.boardSize - 1) * this.gamePlay.boardSize + i); // bottom border
-
-                i += 1;
-              }
-              console.log(borderPositions);
-
-              if (!borderPositions.has(index)) {
-                allowedPositions.push(
-                  index, // чтобы нашелся в includes
-                  index - 9,
-                  index - 8,
-                  index - 6,
-                  index - 1,
-                  index + 1,
-                  index + 7,
-                  index + 8,
-                  index + 9,
-                );
-                console.log(allowedPositions);
-              }
-              // return allowedPositions;
-            // }
-            if (allowedPositions.includes(index)) {
-              console.log('Can go');
-              this.gamePlay.selectCell(index, 'green');
-            }
-          } */
-
-          /* if (this.checkRadius(index, characterClass).includes(index)) { // курсор сместился на ячейку, и она содержится в массиве
-            //this.gamePlay.setCursor(cursors.pointer); // Курсор показывает на ячейку, уда можно шагнуть
-            console.log('Can go');
-          } */
-        // }
       }
 
 
@@ -382,7 +465,7 @@ export default class GameController {
     }
 
     
-    // Вернуть
+    // !!! Вернуть
     /* if (this.gamePlay.cells[index].classList.contains('selected-red')) {
       this.gamePlay.deselectCell(index); // Убрать красную подсветку с предыдущей ячейки
       // this.gamePlay.setCursor(cursors.auto); // Курсор для перехода
@@ -392,10 +475,6 @@ export default class GameController {
 
     this.gamePlay.setCursor(cursors.auto); // Курсор по умолчанию
 
-    /* if (this.gamePlay.boardEl.children[index].hasChildNodes()) {
-      this.gamePlay.hideCellTooltip(index);
-    } */
-    // this.gamePlay.hideCellTooltip(index);
     console.log(this);
 
     console.log('bazingaout');
@@ -410,101 +489,6 @@ export default class GameController {
   set lastIndex(index) {
     this._lastIndex = index;
   }
-
-  /* checkRadius(index, characterClass) {
-    const characterPosition = index;
-    if (this.gamePlay.cells[index].firstElementChild.classList.contains(characterClass)) {
-      if (characterClass === 'magician' && characterClass === 'daemon') {
-        const allowedPositions = [];
-        const borderPositions = new Set();
-
-        let i = 0;
-        while (i < this.gamePlay.boardSize) {
-          borderPositions.add(i * this.gamePlay.boardSize); // left border
-          borderPositions.add(this.gamePlay.boardSize - 1 + this.gamePlay.boardSize * i); // right border
-          borderPositions.add(i); // top border
-          borderPositions.add((this.gamePlay.boardSize - 1) * this.gamePlay.boardSize + i); // bottom border
-
-          i += 1;
-        }
-        console.log(borderPositions);
-
-        if (!borderPositions.has(index)) {
-          allowedPositions.push(
-            index, // чтобы нашелся в includes
-            index - 9,
-            index - 8,
-            index - 7,
-            index - 1,
-            index + 1,
-            index + 7,
-            index + 8,
-            index + 9,
-          );
-          console.log(allowedPositions);
-        }
-        return allowedPositions;
-      }
-    }
-  } */
-
-
-
-
-
-  /* canGoPositions(index, positionedCharacters) {
-    const character = positionedCharacters.find((char) => char.position === index);
-    const allowedPositions = [];
-
-    if (character.character.type === 'magician' || character.character.type === 'daemon') {
-      this.defineBorder(index, 1, 'left', allowedPositions);
-      this.defineBorder(index, 1, 'right', allowedPositions);
-      this.defineBorder(index, 1, 'top', allowedPositions);
-      this.defineBorder(index, 1, 'bottom', allowedPositions);
-
-      this.defineBorder(index, 1, 'top-left', allowedPositions);
-      this.defineBorder(index, 1, 'bottom-right', allowedPositions);
-      this.defineBorder(index, 1, 'bottom-left', allowedPositions);
-      this.defineBorder(index, 1, 'top-right', allowedPositions);
-
-
-      console.log(allowedPositions);
-      return allowedPositions;
-    }
-
-
-    if (character.character.type === 'bowman' || character.character.type === 'vampire') {
-      this.defineBorder(index, 2, 'left', allowedPositions);
-      this.defineBorder(index, 2, 'right', allowedPositions);
-      this.defineBorder(index, 2, 'top', allowedPositions);
-      this.defineBorder(index, 2, 'bottom', allowedPositions);
-
-      this.defineBorder(index, 2, 'top-left', allowedPositions);
-      this.defineBorder(index, 2, 'bottom-right', allowedPositions);
-      this.defineBorder(index, 2, 'bottom-left', allowedPositions);
-      this.defineBorder(index, 2, 'top-right', allowedPositions);
-
-
-      console.log(allowedPositions);
-      return allowedPositions;
-    }
-
-    if (character.character.type === 'swordsman' || character.character.type === 'undead') {
-      this.defineBorder(index, 4, 'left', allowedPositions);
-      this.defineBorder(index, 4, 'right', allowedPositions);
-      this.defineBorder(index, 4, 'top', allowedPositions);
-      this.defineBorder(index, 4, 'bottom', allowedPositions);
-
-      this.defineBorder(index, 4, 'top-left', allowedPositions);
-      this.defineBorder(index, 4, 'bottom-right', allowedPositions);
-      this.defineBorder(index, 4, 'bottom-left', allowedPositions);
-      this.defineBorder(index, 4, 'top-right', allowedPositions);
-
-
-      console.log(allowedPositions);
-      return allowedPositions;
-    }
-  } */
 
   canAttackPositions(index, positionedCharacters) {
     const character = positionedCharacters.find((char) => char.position === index);
@@ -774,131 +758,6 @@ export default class GameController {
     return canStep;
   }
   
-  /* defineBorder(index, step, direction, positions) {
-    const characterRow = Math.floor(index / this.gamePlay.boardSize);
-
-    const leftBorderPositions = new Set();
-    const rightBorderPositions = new Set();
-
-    let i = 0;
-    while (i < this.gamePlay.boardSize) {
-      leftBorderPositions.add(i * this.gamePlay.boardSize); // left border
-      rightBorderPositions.add(this.gamePlay.boardSize - 1 + this.gamePlay.boardSize * i); // right border
-
-      i += 1;
-    }
-    
-    console.log(leftBorderPositions);
-    console.log(rightBorderPositions);
-
-    let border = index;
-    let canStep = 0;
-    if (direction === 'left') {
-      for (let i = 0; i < step; i += 1) {
-        if (border > this.gamePlay.boardSize * characterRow) {
-          border -= 1;
-          canStep += 1;
-          positions.push(border);
-        }
-      }
-    }
-    
-    if (direction === 'right') {
-      for (let i = 0; i < step; i += 1) {
-        if (border < this.gamePlay.boardSize * characterRow + this.gamePlay.boardSize - 1) {
-          border += 1;
-          canStep += 1;
-          positions.push(border);
-        }
-      }
-    }
-
-    if (direction === 'top') {
-      for (let i = 0; i < step; i += 1) {
-        if (border - this.gamePlay.boardSize >= 0) {
-          border -= this.gamePlay.boardSize;
-          canStep += 1;
-          positions.push(border);
-        }
-      }
-    }
-
-    if (direction === 'bottom') {
-      for (let i = 0; i < step; i += 1) {
-        if (border + this.gamePlay.boardSize <= this.gamePlay.boardSize ** 2 - 1) {
-          border += this.gamePlay.boardSize;
-          canStep += 1;
-          positions.push(border);
-        }
-      }
-    }
-
-    if (direction === 'top-left') {
-      for (let i = 0; i < step; i += 1) {
-        // if (border - this.gamePlay.boardSize - 1 >= 0) {
-        if (!leftBorderPositions.has(border)) {
-          // console.log(leftBorderPositions);
-          border -= this.gamePlay.boardSize + 1;
-          canStep += 1;
-          if (border >= 0 && border <= this.gamePlay.boardSize ** 2 - 1) {
-            positions.push(border);
-            console.log(positions);
-          }
-        } else break;
-      }
-    }
-
-    if (direction === 'bottom-right') {
-      for (let i = 0; i < step; i += 1) {
-        // if (border + this.gamePlay.boardSize + 1 <= this.gamePlay.boardSize ** 2 - 1) {
-        if (!rightBorderPositions.has(border)) {
-          // console.log(rightBorderPositions);
-          border += this.gamePlay.boardSize + 1;
-          canStep += 1;
-          if (border >= 0 && border <= this.gamePlay.boardSize ** 2 - 1) {
-            positions.push(border);
-            console.log(positions);
-          }
-        } else break;
-      }
-    }
-
-    if (direction === 'bottom-left') {
-      for (let i = 0; i < step; i += 1) {
-        // if (border + this.gamePlay.boardSize - 1 <= this.gamePlay.boardSize ** 2 - this.gamePlay.boardSize) {
-        if (!leftBorderPositions.has(border)) {
-          // console.log(leftBorderPositions);
-          border += this.gamePlay.boardSize - 1;
-          canStep += 1;
-          // Добавить брейки по достижении границ
-          if (border >= 0 && border <= this.gamePlay.boardSize ** 2 - 1) {
-            positions.push(border);
-            console.log(positions);
-          }
-        } else break;
-      }
-    }
-
-    if (direction === 'top-right') {
-      for (let i = 0; i < step; i += 1) {
-        // if (border - this.gamePlay.boardSize + 1 >= this.gamePlay.boardSize - 1) {
-        if (!rightBorderPositions.has(border)) {
-          // console.log(rightBorderPositions);
-
-          border -= this.gamePlay.boardSize - 1;
-          canStep += 1;
-          if (border >= 0 && border <= this.gamePlay.boardSize ** 2 - 1) {
-            positions.push(border);
-            console.log(positions);
-          }
-        } else break;
-      }
-    }
-
-    console.log(canStep);
-    return canStep;
-  } */
-
   defineAtackZone(index, step, direction, positions) {
     const characterRow = Math.floor(index / this.gamePlay.boardSize);
 
