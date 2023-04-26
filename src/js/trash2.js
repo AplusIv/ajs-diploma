@@ -1,6 +1,6 @@
 import themes from './themes';
 
-// import Character from './Character';
+import Character from './Character';
 import Bowman from './characters/Bowman';
 import Daemon from './characters/Daemon';
 import Magician from './characters/Magician';
@@ -12,12 +12,13 @@ import Vampire from './characters/Vampire';
 import { generateTeam } from './generators';
 
 import PositionedCharacter from './PositionedCharacter';
-// import GamePlay from './GamePlay';
+import GamePlay from './GamePlay';
 import GameState from './GameState';
 import cursors from './cursors';
 
-// import CharacterMovement from './CharacterMovement';
+import CharacterMovement from './CharacterMovement';
 
+// import { defineBorder, canGoPositions } from "./stepMechanics";
 import canGoPositions from './stepMechanics';
 // import { setInterval } from "core-js";
 
@@ -28,6 +29,8 @@ import { getCharacters, getDefineCharacter } from './EnemyMechanics';
 
 // import GamePlay from "./GamePlay";
 
+
+
 export default class GameController {
   constructor(gamePlay, stateService) {
     this.gamePlay = gamePlay;
@@ -37,7 +40,7 @@ export default class GameController {
     this.positionedTeams = []; // добавил свойство для хранения текущих команд,
     // содержащих спозиционированные экземпляры классов персонажей
 
-    // this.characterMovement = CharacterMovement;
+    this.CharacterMovement = CharacterMovement;
 
     this.onCellEnter = this.onCellEnter.bind(this); // Одалживаю метод класса GamePlay
     this.onCellLeave = this.onCellLeave.bind(this);
@@ -82,8 +85,7 @@ export default class GameController {
     this.gameState = gameState;
 
     // Сэт интервал с проверкой чей ход
-    // Поведение противника
-
+    
     const timer = setInterval(() => {
       if (this.gameState.side === 'enemy') {
         console.log(this.gameState.side);
@@ -121,12 +123,6 @@ export default class GameController {
             playersUnderAttack[0].character.health -= damage;
 
             console.log(this.gamePlay.showDamage(playersUnderAttack[0].position, damage)); // Добавить анимацию
-           /*  let damagePromise = async function() {
-              const promise = await this.gamePlay.showDamage(playersUnderAttack[0].position,
-                damage).bind(GameController);
-              console.log(promise);
-            }
-            damagePromise(); */
 
             console.log(`Здоровье уменьшилось на ${damage} и равняется ${playersUnderAttack[0].character.health}`);
           }
@@ -215,10 +211,20 @@ export default class GameController {
         this.gamePlay.redrawPositions(this.positionedTeams);
         this.gameState.nextMove = 'player';
         console.log(this.gameState);
+
       }
       console.log(`Сейчас ходит ${this.gameState.side}`);
     }, 1000); // таймаут для проверки чей ход
-    //
+    // 
+
+    // Повторяется
+    function showCharacterInfo(index, characters) {
+      for (const character of characters) {
+        if (character.position === index) {
+          return `U+1F396${character.character.level} U+2694${character.character.attack} U+1F6E1${character.character.defence} U+2764${character.character.health}`;
+        }
+      }
+    }
 
     // this.gamePlay.addCellEnterListener(this.onCellEnter.bind(this));
     // this.gamePlay.addCellLeaveListener(this.onCellLeave.bind(this));
@@ -315,23 +321,13 @@ export default class GameController {
     return positionedCharacterArray;
   }
 
-  /**
- * Метод формирует подсказку, которая отражает характеристику персонажей, и возвращает его
- *
- * @param index число-индекс персонажа, для которого нужно вывести подсказку,
- * совпадает с ячейкой, в которую перемесился курсор
- * @param characters массив спозиционированных объектов персонажей
- *
- * @returns шаблон подсказки, если персонаж обнаружен в ячейке, или false.
- *
- */
+  // повторяется метод showCharacterInfo
   showCharacterInfo(index, characters) {
     for (const character of characters) {
       if (character.position === index) {
         return `\u{1F396}${character.character.level} \u2694${character.character.attack} \u{1F6E1}${character.character.defence} \u2764${character.character.health}`;
       }
     }
-    return false; //
   }
 
   onCellClick(index) {
@@ -380,6 +376,7 @@ export default class GameController {
             console.log(`Здоровье уменьшилось на ${damage} и равняется ${targetCharacter.character.health}`);
 
             // this.gamePlay.showDamage(index, damage).resolve();
+
 
             this.gamePlay.cells.forEach((i) => i.classList.remove('attackZone', 'goZone')); // Убираем визуальное оформление границ атаки (Можно добавить в redrawPositions)
             this.gamePlay.redrawPositions(this.positionedTeams);
@@ -433,7 +430,7 @@ export default class GameController {
           this.gamePlay.cells.forEach((i) => i.classList.remove('attackZone', 'goZone')); // Убираем визуальное оформление границ атаки (Можно добавить в redrawPositions)
 
           this.gamePlay.redrawPositions(this.positionedTeams);
-          //
+          // 
           this.gameState.nextMove = 'enemy';
           console.log(this.gameState);
         }
@@ -479,6 +476,7 @@ export default class GameController {
       }
     }
 
+
     // !!! Вернуть.
     // Необходимо модифицировать, подсвечивая красным только, если вражеский персонаж в ячейке
 
@@ -497,6 +495,7 @@ export default class GameController {
     /* if (this.gamePlay.boardEl.children[index].hasChildNodes()) { // есть ли потомки в клетке
       this.gamePlay.showCellTooltip(this.showCharacterInfo(index, this.positionedTeams), index);
     } */
+    console.log(this);
     console.log('bazinga');
     console.log(`Перешёл на ${index}`);
     // TODO: react to mouse enter
@@ -505,25 +504,31 @@ export default class GameController {
   onCellLeave(index) {
     if (this.gamePlay.cells[index].hasChildNodes()) {
       if (this.gamePlay.cells[index].classList.contains('selected-yellow')) {
-        //
+
       }
+
 
       this.gamePlay.setCursor(cursors.auto); // Курсор для перехода на пустую клетку
       this.gamePlay.hideCellTooltip(index);
     }
-
+    
     if (this.gamePlay.cells[index].classList.contains('selected-green')) {
       this.gamePlay.deselectCell(index); // Убрать зелёную подсветку с предыдущей ячейки
       // this.gamePlay.setCursor(cursors.auto); // Курсор для перехода
     }
 
+    
     // !!! Вернуть
     /* if (this.gamePlay.cells[index].classList.contains('selected-red')) {
       this.gamePlay.deselectCell(index); // Убрать красную подсветку с предыдущей ячейки
       // this.gamePlay.setCursor(cursors.auto); // Курсор для перехода
     } */
 
+
+
     this.gamePlay.setCursor(cursors.auto); // Курсор по умолчанию
+
+    console.log(this);
 
     console.log('bazingaout');
     console.log(index);
@@ -531,7 +536,7 @@ export default class GameController {
   }
 
   /**
- * Геттер, который возвращает из экземпляра класса GameController сохранённое значение индекса,
+ * Гетер, который возвращает из экземпляра класса GameController сохранённое значение индекса,
  * где ранее находился курсор
  *
  * @returns индекс, где ранее находился курсор (число)
@@ -542,7 +547,7 @@ export default class GameController {
   }
 
   /**
- * Сеттер, который принимает значение индекса
+ * Сетер, который принимает значение индекса
  * и записывает его в свойство экземпляра класса GameController
  *
  * @param index текущий индекс (число)
@@ -551,13 +556,9 @@ export default class GameController {
     this._lastIndex = index;
   }
 
-  /**
- * Метод находит индекс персонажа с определенным классом (в нашем случае, .selected-yellow),
- * если персонаж выбран игроком
- *
- * @returns число - индекс или false, если никакой персонаж не выбран.
- *
- */
+
+
+
   isChosenCharacter() {
     for (let i = 0; i < this.gamePlay.cells.length; i += 1) {
       if (this.gamePlay.cells[i].classList.contains('selected-yellow')) {
@@ -578,23 +579,32 @@ export default class GameController {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* 
-
-
-Вынести в отдельный модуль ???
+Вынести в отдельный модуль
 
 */
-  // ??? Может, передавать метод defineAttackZone() в качестве аргумента в canAttackPositions()
-  /**
-   * Метод собирает и возвращает массив позиций, которые может атаковать определённый персонаж
-   *
-   * @param index число-индекс персонажа, для которого определяются возможные ячейки для атаки
-   * @param positionedCharacters массив спозиционированных персонажей, у одного из которых
-   * определяются позиции для атаки
-   *
-   * @returns массив, содержащий позиции, которые может атаковать персонаж с индексом index
-   *
-   */
+
   canAttackPositions(index, positionedCharacters) {
     const character = positionedCharacters.find((char) => char.position === index);
     // const allowedPositions = [];
@@ -636,17 +646,13 @@ export default class GameController {
       const attackZone = this.defineAtackZone(index, radius, direction, diagonalPositions);
 
       if (attackZone.positions.size === radius) {
-        let {
-          positions,
-          leftBorderPositions,
-          rightBorderPositions
-        } = attackZone; // деструктуризация объекта
+        let { positions, leftBorderPositions, rightBorderPositions } = attackZone; // деструктуризация объекта
         positions = [...positions]; // перевод в массив
         console.log(diagonalPositions);
         console.log(direction);
         console.log(positions);
         console.log(positions[positions.length - 1]);
-
+        
         let counterY = 0;
         if (direction === 'top-left') {
           const position = positions[positions.length - 1];
@@ -733,36 +739,32 @@ export default class GameController {
     return Array.from(finalPositions);
   }
 
-  // Может, имеет смысл переделать функцию, возвращает то, что не используется
-  /**
-   * Метод собирает Set из позиций, куда может перемещаться выбранный персонаж,
-   * но возвращает количество ячеек для перемещения
-   *
-   * @param index число-индекс персонажа, для которого определяются возможные ячейки для шага
-   * @param step число-максимальный шаг персонажа
-   * @param direction направления для шага (4 основных и 4 диагонали)
-   * @param positions Set для добавления уникальных индексов поля, на которые можно сделать шаг
-   *
-   * @returns canstep (количество ячеек на которое можно пойти)
-   *
-   */
+  isChosenCharacter() {
+    for (let i = 0; i < this.gamePlay.cells.length; i += 1) {
+      if (this.gamePlay.cells[i].classList.contains('selected-yellow')) {
+        return i;
+      }
+    }
+    return false;
+  }
+
   defineBorder(index, step, direction, positions) {
     const characterRow = Math.floor(index / this.gamePlay.boardSize);
-
+  
     const leftBorderPositions = new Set();
     const rightBorderPositions = new Set();
-
+  
     let i = 0;
     while (i < this.gamePlay.boardSize) {
       leftBorderPositions.add(i * this.gamePlay.boardSize); // left border
       rightBorderPositions.add(this.gamePlay.boardSize - 1 + this.gamePlay.boardSize * i); // right border
-
+  
       i += 1;
     }
-
+    
     console.log(leftBorderPositions);
     console.log(rightBorderPositions);
-
+  
     let border = index;
     let canStep = 0;
     if (direction === 'left') {
@@ -774,7 +776,7 @@ export default class GameController {
         }
       }
     }
-
+    
     if (direction === 'right') {
       for (let i = 0; i < step; i += 1) {
         if (border < this.gamePlay.boardSize * characterRow + this.gamePlay.boardSize - 1) {
@@ -784,7 +786,7 @@ export default class GameController {
         }
       }
     }
-
+  
     if (direction === 'top') {
       for (let i = 0; i < step; i += 1) {
         if (border - this.gamePlay.boardSize >= 0) {
@@ -794,7 +796,7 @@ export default class GameController {
         }
       }
     }
-
+  
     if (direction === 'bottom') {
       for (let i = 0; i < step; i += 1) {
         if (border + this.gamePlay.boardSize <= this.gamePlay.boardSize ** 2 - 1) {
@@ -804,7 +806,7 @@ export default class GameController {
         }
       }
     }
-
+  
     if (direction === 'top-left') {
       for (let i = 0; i < step; i += 1) {
         // if (border - this.gamePlay.boardSize - 1 >= 0) {
@@ -819,7 +821,7 @@ export default class GameController {
         } else break;
       }
     }
-
+  
     if (direction === 'bottom-right') {
       for (let i = 0; i < step; i += 1) {
         // if (border + this.gamePlay.boardSize + 1 <= this.gamePlay.boardSize ** 2 - 1) {
@@ -834,7 +836,7 @@ export default class GameController {
         } else break;
       }
     }
-
+  
     if (direction === 'bottom-left') {
       for (let i = 0; i < step; i += 1) {
         // if (border + this.gamePlay.boardSize - 1 <= this.gamePlay.boardSize ** 2 - this.gamePlay.boardSize) {
@@ -850,13 +852,13 @@ export default class GameController {
         } else break;
       }
     }
-
+  
     if (direction === 'top-right') {
       for (let i = 0; i < step; i += 1) {
         // if (border - this.gamePlay.boardSize + 1 >= this.gamePlay.boardSize - 1) {
         if (!rightBorderPositions.has(border)) {
           // console.log(rightBorderPositions);
-
+  
           border -= this.gamePlay.boardSize - 1;
           canStep += 1;
           if (border >= 0 && border <= this.gamePlay.boardSize ** 2 - 1) {
@@ -866,24 +868,11 @@ export default class GameController {
         } else break;
       }
     }
-
+  
     console.log(canStep);
     return canStep;
   }
-
-  /**
-   * Метод собирает и возвращает объект zone, который хранит в свойствах
-   * Set-ы из позиций, куда может атаковать выбранный персонаж
-   *
-   * @param index число-индекс персонажа, для которого определяются возможные ячейки для атаки
-   * @param step число-максимальный радиус атаки персонажа
-   * @param direction направления для атаки (4 основных и 4 диагонали)
-   * @param positions Set для добавления уникальных индексов поля, на которые можно сделать шаг
-   *
-   * @returns объект zone, который хранит в свойствах Set-ы из позиций,
-   * куда может атаковать выбранный персонаж
-   *
-   */
+  
   defineAtackZone(index, step, direction, positions) {
     const characterRow = Math.floor(index / this.gamePlay.boardSize);
 
@@ -908,6 +897,9 @@ export default class GameController {
 
       i += 1;
     }
+    
+    // console.log(leftBorderPositions);
+    // console.log(rightBorderPositions);
 
     let border = index;
     let canStep = 0;
@@ -920,7 +912,7 @@ export default class GameController {
         }
       }
     }
-
+    
     if (direction === 'right') {
       for (let i = 0; i < step; i += 1) {
         if (border < this.gamePlay.boardSize * characterRow + this.gamePlay.boardSize - 1) {

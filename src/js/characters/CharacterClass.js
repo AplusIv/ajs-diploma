@@ -1,3 +1,15 @@
+/* 
+Доработайте класс Character
+
+Класс Character был спроектирован как базовый, чтобы вы могли унаследовать от него своих персонажей.
+Поэтому неплохо бы запретить создавать объекты этого класса через new Character(level),
+но при этом создание наследников должно работать без проблем:
+new Daemon, где class Daemon extends Character.
+
+Ознакомьтесь с документацией на new.target и реализуйте подобную логику,
+выбрасывая ошибку в конструкторе Character.
+*/
+
 export default class Character {
   constructor(name, type) {
     if (typeof name === 'string' && name.length >= 2 && name.length <= 10) {

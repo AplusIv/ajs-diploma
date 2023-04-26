@@ -16,6 +16,10 @@ import characterGenerator from './generators';
  * */
 export default class Team {
   // TODO: write your logic here
+
+ // ??? Возможно нужно было сразу возвращать экземпляры классов в команды
+ // !!! Обратите внимание на new в отличие от playerTypes в прошлом примере
+
   constructor(characters) {
     this.characters = [...characters];
   }

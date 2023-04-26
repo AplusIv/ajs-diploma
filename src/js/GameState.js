@@ -14,7 +14,7 @@ export default class GameState {
     return null;
   }
   //
-  
+
   static getTeamCharactersClasses() {
     return {
       player: ['bowman', 'magician', 'swordsman'],

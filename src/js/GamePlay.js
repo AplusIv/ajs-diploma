@@ -212,7 +212,7 @@ export default class GamePlay {
   hideCellTooltip(index) {
     this.cells[index].title = '';
   }
-  
+
   showDamage(index, damage) {
     return new Promise((resolve) => {
       const cell = this.cells[index];
@@ -223,11 +223,12 @@ export default class GamePlay {
       // 
       console.log('Promise');
       setTimeout(() => console.log("done"), 1000);
+      // 
 
       damageEl.addEventListener('animationend', () => {
         cell.removeChild(damageEl);
-        console.log('AnimationEnd');
-        resolve('AnimationEnd');
+        console.log('AnimationEnd'); // вывод в консоль
+        resolve();
       });
 
       /* damageEl.addEventListener('animationend', () => {

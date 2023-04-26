@@ -11,7 +11,7 @@
 // Для определения персонажей игрока и противника
 export function getCharacters(positionedTeams, classesArray) {
   const chars = [];
-  positionedTeams.forEach(element => {
+  positionedTeams.forEach((element) => {
     if (classesArray.includes(element.character.type)) {
       console.log(element);
       chars.push(element);

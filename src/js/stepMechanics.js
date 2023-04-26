@@ -1,10 +1,10 @@
 /**
- * HOF, которая на основе переданного метода defineBorder формирует Set() позиций,
+ * HOF, которая на основе переданного метода defineBorder формирует Set позиций,
  * на которые может переместиться выбранный персонаж
  * @param fn функция defineBorder для определения допустимых индексов перемещений
  * @param index индекс выбранного персонажа
  * @param positionedCharacters массив спозиционированных персонажей
- * @returns Set() с индексами допустимых перемещений
+ * @returns Set с индексами допустимых перемещений
  * */
 export default function canGoPositions(fn, index, positionedCharacters) {
   const character = positionedCharacters.find((char) => char.position === index);
